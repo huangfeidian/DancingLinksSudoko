@@ -209,15 +209,15 @@ void node_heap_decrease(int node_index)//¶ÔÓÚÒ»¸öµã½øĞĞËıËùÔÚµÄĞĞµÄÉ¾³ı£¬ÒòÎªÒ»Ğ
 }
 void node_heap_increase(int node_index)//Ôö¼ÓÓë¼õÉÙµÄË³ĞòÊÇ¸ÕºÃÏà·´µÄ
 {
-	int leftmost_node;//µ±Ç°½ÚµãËùÔÚĞĞµÄ×îÓÒ½ÚµãµÄË÷Òı
-	leftmost_node = node_index - (node_index % 4)+3;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value + 1);
-	leftmost_node--;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value + 1);
-	leftmost_node--;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value + 1);
-	leftmost_node--;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value + 1);
+	int rightmost_node;//µ±Ç°½ÚµãËùÔÚĞĞµÄ×îÓÒ½ÚµãµÄË÷Òı
+	rightmost_node = node_index - (node_index % 4)+3;
+	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	rightmost_node--;
+	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	rightmost_node--;
+	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	rightmost_node--;
+	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
 }
 void insert_row(int current_row_index, int current_column_index, int value)
 {
