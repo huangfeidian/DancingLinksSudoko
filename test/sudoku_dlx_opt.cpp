@@ -8,24 +8,24 @@ using namespace std;
 #define shift_base 0x80000000
 struct basic_node
 {
-	//ÕâÀïÖ®ËùÒÔÃ»ÓĞleftºÍrightÊÇÒòÎªÎÒÃÇÃ¿´Î·ÖÅäÒ»ĞĞµÄÊ±ºò£¬ÊÇËÄ¸öµãÒ»Æğ·ÖµÄ£¬ËùÒÔ¿ÉÒÔÖ±½ÓÍ¨¹ı¼Ó¼õ1À´¸ã¶¨×óÓÒ¹ØÏµ
+	//è¿™é‡Œä¹‹æ‰€ä»¥æ²¡æœ‰leftå’Œrightæ˜¯å› ä¸ºæˆ‘ä»¬æ¯æ¬¡åˆ†é…ä¸€è¡Œçš„æ—¶å€™ï¼Œæ˜¯å››ä¸ªç‚¹ä¸€èµ·åˆ†çš„ï¼Œæ‰€ä»¥å¯ä»¥ç›´æ¥é€šè¿‡åŠ å‡1æ¥æå®šå·¦å³å…³ç³»
 	int down;
 	int up;
 	int column;
 };
-struct basic_node total_nodes[324 + 81 * 9 * 4];//324¸öÍ·½Úµã£¬81¸ö¸ñ×Ó£¬Ã¿¸ö¸ñ×ÓÓĞ9ÖÖÇé¿ö£¬Ã¿ÖÖÇé¿öÓĞËÄ¸öµã¡£
-int avail_node_index = 324;//·ÖÅä½ÚµãÊ±µÄ±àºÅ
+struct basic_node total_nodes[324 + 81 * 9 * 4];//324ä¸ªå¤´èŠ‚ç‚¹ï¼Œ81ä¸ªæ ¼å­ï¼Œæ¯ä¸ªæ ¼å­æœ‰9ç§æƒ…å†µï¼Œæ¯ç§æƒ…å†µæœ‰å››ä¸ªç‚¹ã€‚
+int avail_node_index = 324;//åˆ†é…èŠ‚ç‚¹æ—¶çš„ç¼–å·
 int node_stack[81];
 int stack_index = 0;
 struct node_heap
 {
-	int cul_value;//´ú±íÕâ¸öÁĞÖĞµÄ1µÄ¸öÊı
-	int position_index;//´ú±í×Å¸öµãËùÖ¸Ê¾µÄÁĞµÄË÷Òı
+	int cul_value;//ä»£è¡¨è¿™ä¸ªåˆ—ä¸­çš„1çš„ä¸ªæ•°
+	int position_index;//ä»£è¡¨ç€ä¸ªç‚¹æ‰€æŒ‡ç¤ºçš„åˆ—çš„ç´¢å¼•
 };
-struct node_heap mutual_index[324];//Õâ¸öÊÇ¶Ñ
-int current_heap_number = 323;//Õâ¸öÊÇµ±Ç°¿ÉÓÃµÄ¶ÑÖĞµÄ½ÚµãÊı
-int available_column = 323;//Õâ¸öÊÇµ±Ç°¿ÉÓÃÁĞÊı
-int position_index[324];//Õâ¸öÊÇÁĞÔÚ¶ÑÖĞµÄÎ»ÖÃ
+struct node_heap mutual_index[324];//è¿™ä¸ªæ˜¯å †
+int current_heap_number = 323;//è¿™ä¸ªæ˜¯å½“å‰å¯ç”¨çš„å †ä¸­çš„èŠ‚ç‚¹æ•°
+int available_column = 323;//è¿™ä¸ªæ˜¯å½“å‰å¯ç”¨åˆ—æ•°
+int position_index[324];//è¿™ä¸ªæ˜¯åˆ—åœ¨å †ä¸­çš„ä½ç½®
 int out[9][9] = { { 8, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 3, 6, 0, 0, 0, 0, 0 }, { 0, 7, 0, 0, 9, 0, 2, 0, 0 }, \
 {0, 5, 0, 0, 0, 7, 0, 0, 0}, { 0, 0, 0, 0, 4, 5, 7, 0, 0 }, { 0, 0, 0, 1, 0, 0, 0, 3, 0 }, { 0, 0, 1, 0, 0, 0, 0, 6, 8 }, \
 {0, 0, 8, 5, 0, 0, 0, 1, 0}, { 0, 9, 0, 0, 0, 0, 4, 0, 0 } };
@@ -46,7 +46,7 @@ void initial(void)
 	current_heap_number = 323;
 	avail_node_index = 324;
 }
-void swap_heap(int index_one, int index_two)//½»»»ÔÚ¶ÑÖĞµÄÁ½¸öÔªËØµÄÖµ£¬¼°Ïà¹ØÊı¾İË÷Òı
+void swap_heap(int index_one, int index_two)//äº¤æ¢åœ¨å †ä¸­çš„ä¸¤ä¸ªå…ƒç´ çš„å€¼ï¼ŒåŠç›¸å…³æ•°æ®ç´¢å¼•
 {
 	int intermidate_one, intermidate_two;
 	intermidate_one = mutual_index[index_one].cul_value;
@@ -58,7 +58,7 @@ void swap_heap(int index_one, int index_two)//½»»»ÔÚ¶ÑÖĞµÄÁ½¸öÔªËØµÄÖµ£¬¼°Ïà¹ØÊı
 	position_index[mutual_index[index_two].position_index] = index_two;
 	position_index[mutual_index[index_one].position_index] = index_one;
 }
-void heap_initial()//³õÊ¼»¯¶Ñ£¬Õâ¸ö¶¯×÷ÊÇÔÚËùÓĞµÄĞĞ²åÈëÍê³ÉÖ®ºó×öµÄ
+void heap_initial()//åˆå§‹åŒ–å †ï¼Œè¿™ä¸ªåŠ¨ä½œæ˜¯åœ¨æ‰€æœ‰çš„è¡Œæ’å…¥å®Œæˆä¹‹ååšçš„
 {
 	int k, i = 0;
 	int current_min;
@@ -93,16 +93,16 @@ void heap_initial()//³õÊ¼»¯¶Ñ£¬Õâ¸ö¶¯×÷ÊÇÔÚËùÓĞµÄĞĞ²åÈëÍê³ÉÖ®ºó×öµÄ
 		}
 	}
 }
-void delete_minimal()//É¾³ı¶ÑÖĞ×îĞ¡µÄÔªËØ
+void delete_minimal()//åˆ é™¤å †ä¸­æœ€å°çš„å…ƒç´ 
 {
 	int k;
 	int current_min;
 	if (current_heap_number != 0)
 	{
-		swap_heap(0, current_heap_number);//½»»»×î¸ßÔªËØÓë×îµÍÔªËØ
-		current_heap_number--;//È»ºó½«¶ÑµÄ´óĞ¡½øĞĞËõ¼õ
+		swap_heap(0, current_heap_number);//äº¤æ¢æœ€é«˜å…ƒç´ ä¸æœ€ä½å…ƒç´ 
+		current_heap_number--;//ç„¶åå°†å †çš„å¤§å°è¿›è¡Œç¼©å‡
 		k = 0;
-		while (2 * k + 1 <= current_heap_number)//È»ºó£¬ÏÂÃæ±ãÊÇÒ»Ğ©Î¬»¤ĞÔµÄ¹¤×÷£¬ÓÃÀ´Î¬»¤×îĞ¡¶Ñ
+		while (2 * k + 1 <= current_heap_number)//ç„¶åï¼Œä¸‹é¢ä¾¿æ˜¯ä¸€äº›ç»´æŠ¤æ€§çš„å·¥ä½œï¼Œç”¨æ¥ç»´æŠ¤æœ€å°å †
 		{
 			current_min = mutual_index[k].cul_value;
 			current_min = current_min < mutual_index[2 * k + 1].cul_value ? current_min : mutual_index[2 * k + 1].cul_value;
@@ -129,42 +129,42 @@ void delete_minimal()//É¾³ı¶ÑÖĞ×îĞ¡µÄÔªËØ
 			}
 		}
 	}
-	else//Èç¹ûÖ»Ê£ÏÂÒ»¸öÔªËØ£¬ÄÇ¾Í²»ĞèÒª½øĞĞ½»»»£¬Ö±½Ó½«¶ÑÔªËØµÄ¸öÊı½µµÍÒ»
+	else//å¦‚æœåªå‰©ä¸‹ä¸€ä¸ªå…ƒç´ ï¼Œé‚£å°±ä¸éœ€è¦è¿›è¡Œäº¤æ¢ï¼Œç›´æ¥å°†å †å…ƒç´ çš„ä¸ªæ•°é™ä½ä¸€
 	{
 		current_heap_number = -1;
 	}
 }
-void heap_renew(int target_position, int new_value)//¶ÔÓÚµÚtarget_positionÁĞ£¬½øĞĞ¶ÈÊı¸üĞÂ
+void heap_renew(int target_position, int new_value)//å¯¹äºç¬¬target_positionåˆ—ï¼Œè¿›è¡Œåº¦æ•°æ›´æ–°
 {
 	int heap_target_position, k, current_min;
-	heap_target_position = position_index[target_position];//Õâ¸öÊÇÕâÒ»ÁĞÔÚ¶ÑÖĞËùÔÚµÄÎ»ÖÃ
+	heap_target_position = position_index[target_position];//è¿™ä¸ªæ˜¯è¿™ä¸€åˆ—åœ¨å †ä¸­æ‰€åœ¨çš„ä½ç½®
 	k = heap_target_position;
-	if (new_value < mutual_index[k].cul_value)//Èç¹ûÖµÊÇ¼õÉÙµÄ£¬¾ÍÖ±½Ó½øĞĞ¸³Öµ£¬È»ºóÎ¬»¤¶ÑµÄĞÔÖÊ
+	if (new_value < mutual_index[k].cul_value)//å¦‚æœå€¼æ˜¯å‡å°‘çš„ï¼Œå°±ç›´æ¥è¿›è¡Œèµ‹å€¼ï¼Œç„¶åç»´æŠ¤å †çš„æ€§è´¨
 	{
 		mutual_index[k].cul_value = new_value;
-		while (k > 0 && (mutual_index[(k - 1) / 2].cul_value > mutual_index[k].cul_value))//Î¬»¤¶Ñ
+		while (k > 0 && (mutual_index[(k - 1) / 2].cul_value > mutual_index[k].cul_value))//ç»´æŠ¤å †
 		{
 			swap_heap((k - 1) / 2, k);
 			k = (k - 1) / 2;
 		}
-		if (new_value == 0)//Èç¹ûÊÇ¸³ÖµÎª0£¬Ôò´Ó¶ÑÖĞ½øĞĞÉ¾³ı£¬ÒòÎªÎÒÃÇÃ¿´Î²Ù×İÒ»¸öÔªËØ£¬ËùÒÔ×î¶à»áÓĞÒ»¸öÔªËØÎª0£¬ËùÒÔ¿Ï¶¨ÊÇ×îĞ¡Öµ¡£
+		if (new_value == 0)//å¦‚æœæ˜¯èµ‹å€¼ä¸º0ï¼Œåˆ™ä»å †ä¸­è¿›è¡Œåˆ é™¤ï¼Œå› ä¸ºæˆ‘ä»¬æ¯æ¬¡æ“çºµä¸€ä¸ªå…ƒç´ ï¼Œæ‰€ä»¥æœ€å¤šä¼šæœ‰ä¸€ä¸ªå…ƒç´ ä¸º0ï¼Œæ‰€ä»¥è‚¯å®šæ˜¯æœ€å°å€¼ã€‚
 		{
 			delete_minimal();
 		}
 	}
-	else//¶ÔÓÚÖµÔö´óµÄÇé¿ö
+	else//å¯¹äºå€¼å¢å¤§çš„æƒ…å†µ
 	{
 		mutual_index[k].cul_value = new_value;
-		if (new_value == 1)//Èç¹ûĞÂµÄÖµÊÇ1£¬Ôò°ÑÕâ¸öÔªËØÖØĞÂ¼ÓÈë¶ÑÖĞ
+		if (new_value == 1)//å¦‚æœæ–°çš„å€¼æ˜¯1ï¼Œåˆ™æŠŠè¿™ä¸ªå…ƒç´ é‡æ–°åŠ å…¥å †ä¸­
 		{
-			current_heap_number++;//À©´ó¶ÑµÄ·¶Î§£¬ÎÒÃÇ¿ÉÒÔÖ¤Ã÷ÖØĞÂ¼ÓÈë¶ÑÖĞµÄÔªËØÒ»¶¨ÊÇÅÅÔÚ¶ÑµÄÄ©Î²£¬µ±È»Ìõ¼şÊÇÉ¾³ıÓë²åÈëµÄË³ĞòÊÇ¶ÔÓ¦Ïà·´µÄ
-			while (k > 0 && (mutual_index[(k - 1) / 2].cul_value > mutual_index[k].cul_value))//ÓÉÓÚĞÂµÄÖµÊÇ1£¬ËùÒÔ²»¿ÉÄÜ±ÈÉÏÒ»¸öÊı´ó
+			current_heap_number++;//æ‰©å¤§å †çš„èŒƒå›´ï¼Œæˆ‘ä»¬å¯ä»¥è¯æ˜é‡æ–°åŠ å…¥å †ä¸­çš„å…ƒç´ ä¸€å®šæ˜¯æ’åœ¨å †çš„æœ«å°¾ï¼Œå½“ç„¶æ¡ä»¶æ˜¯åˆ é™¤ä¸æ’å…¥çš„é¡ºåºæ˜¯å¯¹åº”ç›¸åçš„
+			while (k > 0 && (mutual_index[(k - 1) / 2].cul_value > mutual_index[k].cul_value))//ç”±äºæ–°çš„å€¼æ˜¯1ï¼Œæ‰€ä»¥ä¸å¯èƒ½æ¯”ä¸Šä¸€ä¸ªæ•°å¤§
 			{
 				swap_heap((k - 1) / 2, k);
 				k = (k - 1) / 2;
 			}
 		}
-		else//Èç¹û²»ÊÇ1£¬ËµÃ÷ÒÑ¾­ÔÚ¶ÑÖĞ£¬ËùÒÔ²»ĞèÒªÀ©´ó¶ÑµÄ·¶Î§£¬Ö±½Ó¸³ÖµÖ®ºó½øĞĞÎ¬»¤¶Ñ½á¹¹¾ÍĞĞ
+		else//å¦‚æœä¸æ˜¯1ï¼Œè¯´æ˜å·²ç»åœ¨å †ä¸­ï¼Œæ‰€ä»¥ä¸éœ€è¦æ‰©å¤§å †çš„èŒƒå›´ï¼Œç›´æ¥èµ‹å€¼ä¹‹åè¿›è¡Œç»´æŠ¤å †ç»“æ„å°±è¡Œ
 		{
 			while (2 * k + 1 <= current_heap_number)
 			{
@@ -195,9 +195,9 @@ void heap_renew(int target_position, int new_value)//¶ÔÓÚµÚtarget_positionÁĞ£¬½ø
 		}
 	}
 }
-void node_heap_decrease(int node_index)//¶ÔÓÚÒ»¸öµã½øĞĞËıËùÔÚµÄĞĞµÄÉ¾³ı£¬ÒòÎªÒ»ĞĞÖĞÒ»¶¨ÓĞËÄ¸öÔªËØ£¬ËùÒÔÓĞËÄÁĞ£¬ÎÒÃÇ¶ÔÕâËÄÁĞµÄ¶ÈÊı¶¼½øĞĞ¼õÉÙ1
+void node_heap_decrease(int node_index)//å¯¹äºä¸€ä¸ªç‚¹è¿›è¡Œå¥¹æ‰€åœ¨çš„è¡Œçš„åˆ é™¤ï¼Œå› ä¸ºä¸€è¡Œä¸­ä¸€å®šæœ‰å››ä¸ªå…ƒç´ ï¼Œæ‰€ä»¥æœ‰å››åˆ—ï¼Œæˆ‘ä»¬å¯¹è¿™å››åˆ—çš„åº¦æ•°éƒ½è¿›è¡Œå‡å°‘1
 {
-	int leftmost_node;//µ±Ç°½ÚµãËùÔÚĞĞµÄ×î×ó½ÚµãµÄË÷Òı
+	int leftmost_node;//å½“å‰èŠ‚ç‚¹æ‰€åœ¨è¡Œçš„æœ€å·¦èŠ‚ç‚¹çš„ç´¢å¼•
 	leftmost_node = node_index - (node_index % 4);
 	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value -1);
 	leftmost_node++;
@@ -207,9 +207,9 @@ void node_heap_decrease(int node_index)//¶ÔÓÚÒ»¸öµã½øĞĞËıËùÔÚµÄĞĞµÄÉ¾³ı£¬ÒòÎªÒ»Ğ
 	leftmost_node++;
 	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value -1);
 }
-void node_heap_increase(int node_index)//Ôö¼ÓÓë¼õÉÙµÄË³ĞòÊÇ¸ÕºÃÏà·´µÄ
+void node_heap_increase(int node_index)//å¢åŠ ä¸å‡å°‘çš„é¡ºåºæ˜¯åˆšå¥½ç›¸åçš„
 {
-	int rightmost_node;//µ±Ç°½ÚµãËùÔÚĞĞµÄ×îÓÒ½ÚµãµÄË÷Òı
+	int rightmost_node;//å½“å‰èŠ‚ç‚¹æ‰€åœ¨è¡Œçš„æœ€å³èŠ‚ç‚¹çš„ç´¢å¼•
 	rightmost_node = node_index - (node_index % 4)+3;
 	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
 	rightmost_node--;
@@ -256,7 +256,7 @@ void insert_row(int current_row_index, int current_column_index, int value)
 	total_nodes[column_index].up = current_leftmost;
 	mutual_index[column_index].cul_value++;
 }
-void print_result()//´òÓ¡³ö½á¹û
+void print_result()//æ‰“å°å‡ºç»“æœ
 {
 	int i, j, k, current_index;
 	int m, n;
@@ -288,12 +288,12 @@ void print_result()//´òÓ¡³ö½á¹û
 	}
 }
 
-void creat_dlx_sudoku()//ÀûÓÃ¾ØÕóÀ´½¨Á¢Ê®×ÖÍø¸ñ
+void creat_dlx_sudoku()//åˆ©ç”¨çŸ©é˜µæ¥å»ºç«‹åå­—ç½‘æ ¼
 {
 	int i, j, k;
-	int row_position[9][9];//Õâ¸öÊÇĞĞ
-	int column_position[9][9];//Õâ¸öÊÇÁĞ
-	int small_position[9][9];//Õâ¸öÊÇÃ¿Ò»¸öĞ¡·½¸ñ
+	int row_position[9][9];//è¿™ä¸ªæ˜¯è¡Œ
+	int column_position[9][9];//è¿™ä¸ªæ˜¯åˆ—
+	int small_position[9][9];//è¿™ä¸ªæ˜¯æ¯ä¸€ä¸ªå°æ–¹æ ¼
 	initial();
 	for (i = 0; i < 9; i++)
 	{
@@ -346,13 +346,13 @@ void creat_dlx_sudoku()//ÀûÓÃ¾ØÕóÀ´½¨Á¢Ê®×ÖÍø¸ñ
 void in_stack(int target_to_stack)
 {
 	int leftmost = target_to_stack - target_to_stack % 4;
-	for (int i = 0; i < 4; i++)//¶ÔÓÚµ±Ç°ĞĞµÄÃ¿Ò»ÁĞ
+	for (int i = 0; i < 4; i++)//å¯¹äºå½“å‰è¡Œçš„æ¯ä¸€åˆ—
 	{
 		int current_column_traversal = leftmost + i;
 		current_column_traversal = total_nodes[current_column_traversal].down;
-		while (current_column_traversal != leftmost + i)//É¾³ıµ±Ç°ÁĞÏà½»µÄĞĞ
+		while (current_column_traversal != leftmost + i)//åˆ é™¤å½“å‰åˆ—ç›¸äº¤çš„è¡Œ
 		{
-			if (current_column_traversal != total_nodes[current_column_traversal].column)//¼´²»ÊÇÍ·ĞĞ
+			if (current_column_traversal != total_nodes[current_column_traversal].column)//å³ä¸æ˜¯å¤´è¡Œ
 			{
 				int temp_node = current_column_traversal - current_column_traversal % 4-1;
 				for (int j = 0; j < 4; j++)
@@ -369,22 +369,22 @@ void in_stack(int target_to_stack)
 			current_column_traversal = total_nodes[current_column_traversal].down;
 		}
 	}
-	node_heap_decrease(target_to_stack);//×îºó¶Ôµ±Ç°ĞĞ½øĞĞÉ¾³ı
-	node_stack[stack_index++] = target_to_stack;//È»ºó²ÅÊÇÈëÕ»
+	node_heap_decrease(target_to_stack);//æœ€åå¯¹å½“å‰è¡Œè¿›è¡Œåˆ é™¤
+	node_stack[stack_index++] = target_to_stack;//ç„¶åæ‰æ˜¯å…¥æ ˆ
 	available_column -= 4;
 	//print_result();
 }
-void out_stack()//×¢Òâ³öÕ»µÄÊ±ºòÊÇÏà·´µÄ²Ù×÷£¬ËùÓĞÉ¾³ı¶¼Ïà·´
+void out_stack()//æ³¨æ„å‡ºæ ˆçš„æ—¶å€™æ˜¯ç›¸åçš„æ“ä½œï¼Œæ‰€æœ‰åˆ é™¤éƒ½ç›¸å
 {
 	int target_to_stack = node_stack[--stack_index];
 	int rightmost = target_to_stack - target_to_stack % 4+3;
-	for (int i = 0; i < 4; i++)//¶ÔÓÚµ±Ç°ĞĞµÄÃ¿Ò»ÁĞ
+	for (int i = 0; i < 4; i++)//å¯¹äºå½“å‰è¡Œçš„æ¯ä¸€åˆ—
 	{
 		int current_column_traversal = rightmost - i;
 		current_column_traversal = total_nodes[current_column_traversal].up;
-		while (current_column_traversal != rightmost - i)//É¾³ıµ±Ç°ÁĞÏà½»µÄĞĞ
+		while (current_column_traversal != rightmost - i)//åˆ é™¤å½“å‰åˆ—ç›¸äº¤çš„è¡Œ
 		{
-			if (current_column_traversal != total_nodes[current_column_traversal].column)//¼´²»ÊÇÍ·ĞĞ
+			if (current_column_traversal != total_nodes[current_column_traversal].column)//å³ä¸æ˜¯å¤´è¡Œ
 			{
 				int temp_node = current_column_traversal - current_column_traversal % 4+4;
 				for (int j = 0; j < 4; j++)
@@ -401,11 +401,11 @@ void out_stack()//×¢Òâ³öÕ»µÄÊ±ºòÊÇÏà·´µÄ²Ù×÷£¬ËùÓĞÉ¾³ı¶¼Ïà·´
 			current_column_traversal = total_nodes[current_column_traversal].up;
 		}
 	}
-	node_heap_increase(target_to_stack);//×îºó¶Ôµ±Ç°ĞĞ½øĞĞ»Ø¸´
+	node_heap_increase(target_to_stack);//æœ€åå¯¹å½“å‰è¡Œè¿›è¡Œå›å¤
 	available_column += 4;
 	//print_result();
 }
-int find_next()//ÓÃÀ´ÕÒÏÂÒ»¸ö¿ÉÒÔÈëÕ»µÄÔªËØ£¬Èç¹ûÎŞ·¨ÈëÕ»»òÕßÒÑ¾­ÕÒµ½ÁË½â£¬Ôò·µ»Ø²¢½øĞĞ»ØËİ²Ù×÷
+int find_next()//ç”¨æ¥æ‰¾ä¸‹ä¸€ä¸ªå¯ä»¥å…¥æ ˆçš„å…ƒç´ ï¼Œå¦‚æœæ— æ³•å…¥æ ˆæˆ–è€…å·²ç»æ‰¾åˆ°äº†è§£ï¼Œåˆ™è¿”å›å¹¶è¿›è¡Œå›æº¯æ“ä½œ
 {
 	int target_position;
 	int temp_node_one;
@@ -436,14 +436,14 @@ void seek_sudoku()
 	while (1)
 	{
 		find_result = find_next();
-		if (!find_result)//Èç¹ûÎŞ·¨ÈëÕ»ÇÒÄ¿Ç°Ã»ÓĞÕÒµ½½â£¬Ôò³öÕ»
+		if (!find_result)//å¦‚æœæ— æ³•å…¥æ ˆä¸”ç›®å‰æ²¡æœ‰æ‰¾åˆ°è§£ï¼Œåˆ™å‡ºæ ˆ
 		{
 			temp_node_one = node_stack[stack_index - 1];
 			out_stack();
 			temp_node_one = total_nodes[temp_node_one].down;
-			while ((temp_node_one==total_nodes[temp_node_one].column))//Èç¹ûµ±Ç°ÔªËØÊÇµ±Ç°ÁĞÍ·½Úµã£¬Ôòµİ¹é³öÕ»
+			while ((temp_node_one==total_nodes[temp_node_one].column))//å¦‚æœå½“å‰å…ƒç´ æ˜¯å½“å‰åˆ—å¤´èŠ‚ç‚¹ï¼Œåˆ™é€’å½’å‡ºæ ˆ
 			{
-				if (stack_index == 0)//Èç¹ûÕ»¿Õ£¬ÔòËùÓĞµÄËÑË÷¿Õ¼äÒÑ¾­ËÑË÷ÍêÈ« ·µ»Ø
+				if (stack_index == 0)//å¦‚æœæ ˆç©ºï¼Œåˆ™æ‰€æœ‰çš„æœç´¢ç©ºé—´å·²ç»æœç´¢å®Œå…¨ è¿”å›
 				{
 					return;
 				}
@@ -454,11 +454,11 @@ void seek_sudoku()
 					temp_node_one = total_nodes[temp_node_one].down;
 				}
 			}
-			in_stack(temp_node_one);//½«ËùÑ¡ÔªËØÈëÕ»
+			in_stack(temp_node_one);//å°†æ‰€é€‰å…ƒç´ å…¥æ ˆ
 		}
 		else
 		{
-			if (find_result / 2)//Èç¹ûÒÑ¾­ÕÒµ½½á¹û£¬Ôò·µ»Ø£¬ÊÂÊµÉÏÎÒÃÇ¿ÉÒÔ¸ü¸ÄÕâ¸öÂß¼­À´Ó¦¶ÔÓĞ¶à¸ö½âµÄÇé¿ö£¬²¢°ÑËüÈ«²¿´òÓ¡
+			if (find_result / 2)//å¦‚æœå·²ç»æ‰¾åˆ°ç»“æœï¼Œåˆ™è¿”å›ï¼Œäº‹å®ä¸Šæˆ‘ä»¬å¯ä»¥æ›´æ”¹è¿™ä¸ªé€»è¾‘æ¥åº”å¯¹æœ‰å¤šä¸ªè§£çš„æƒ…å†µï¼Œå¹¶æŠŠå®ƒå…¨éƒ¨æ‰“å°
 			{
 				return;
 			}
@@ -468,7 +468,7 @@ void seek_sudoku()
 int main()
 {
 	clock_t clock_one, clock_two, clock_three;
-	ifstream suduko_file("sudoku.txt");
+	ifstream suduko_file("../data/sudoku.txt");
 	char temp[82];
 	clock_one = clock();
 	int line = 1;
