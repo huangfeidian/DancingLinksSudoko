@@ -3,6 +3,7 @@
 dancing_links_solver::dancing_links_solver(std::uint32_t in_col_num, std::uint32_t in_reserve_node_num)
 : col_num(in_col_num)
 , col_counter(in_col_num + 1, 0)
+, avail_cols(in_col_num, 0)
 {
     _nodes.reserve(in_reserve_node_num);
     for(std::uint32_t i = 0; i< col_num + 1; i++)
@@ -62,6 +63,12 @@ void dancing_links_solver::relink_row(std::uint32_t row_idx)
 		_nodes[temp_node.up].down = i;
 		_nodes[temp_node.down].up = i;
         col_counter[one_col]++;
+        if(col_counter[one_col] == 1)
+        {
+            avail_cols[avail_col_idx] = one_col;
+            avail_col_idx++;
+			//std::cout << "avail_col_idx add to " << avail_col_idx << " for col " << one_col << std::endl;
+        }
     }
 }
 void dancing_links_solver::unlink_row(std::uint32_t row_idx)
@@ -133,25 +140,37 @@ col_desc dancing_links_solver::row_to_col_desc(std::uint32_t row_idx) const
     return result;
 }
 
-std::uint32_t dancing_links_solver::pick_next_col() const
+std::uint32_t dancing_links_solver::pick_next_col() 
 {
     std::uint32_t col_idx = 0;
-    for(std::uint32_t i = 1; i<= col_num; i++)
+    std::uint32_t i = 0;
+    while(i < avail_col_idx)
     {
-        if(col_counter[i] == 0)
+        if(col_counter[avail_cols[i]] == 0)
         {
-            continue;
-        }
-        if(col_idx == 0)
-        {
-            col_idx = i;
+            
+            avail_col_idx--;
+			//std::cout << "avail_col_idx dec to " << avail_col_idx << " for col " << avail_cols[i] << std::endl;
+			std::swap(avail_cols[i], avail_cols[avail_col_idx]);
         }
         else
         {
-            col_idx = col_counter[i] < col_counter[col_idx]? i: col_idx;
+            if(col_idx == 0)
+            {
+                col_idx = avail_cols[i];
+            }
+            else
+            {
+                col_idx = col_counter[col_idx] <= col_counter[avail_cols[i] ] ? col_idx: avail_cols[i];
+            }
+            i++;
+            
         }
         
     }
+	return col_idx;
+    
+        
     return col_idx;
 }
 std::vector<uint32_t> dancing_links_solver::solve_one()
@@ -226,6 +245,7 @@ bool dancing_links_solver::solve_one_impl()
     backtrace_flag = false;
     while(_nodes[0].right != 0)
     {
+		auto cur_col = pick_next_col();
 		print_select_nodes(selected_nodes);
         if(backtrace_flag)
         {
@@ -237,7 +257,6 @@ bool dancing_links_solver::solve_one_impl()
         }
         else
         {
-            auto cur_col = pick_next_col();
             if(cur_col == 0)
             {
                 // cant select any col 
@@ -255,6 +274,7 @@ bool dancing_links_solver::solve_one_impl()
         }
 
     }
+	auto cur_col = pick_next_col();
     return true;
 }
 std::vector<std::vector<uint32_t>> dancing_links_solver::solve_all()
