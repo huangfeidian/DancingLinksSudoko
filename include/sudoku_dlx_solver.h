@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <array>
 #include <iostream>
+#include <optional>
 #include "dancing_links_solver.h"
 
 struct sudoku_configuration
@@ -37,7 +38,7 @@ class sudoku_dlx_solver: public dancing_links_solver
 {
 public:
     sudoku_dlx_solver(const sudoku_configuration& configure);
-    sudoku_configuration solve_one();
+    std::optional<sudoku_configuration> solve_one();
     std::vector<sudoku_configuration> solve_all();
     sudoku_configuration col_desc_to_sudoku(const std::vector<std::uint32_t>& row_indexes) const;
 	void print_row(const std::string& prefix, std::uint32_t row_idx) const;

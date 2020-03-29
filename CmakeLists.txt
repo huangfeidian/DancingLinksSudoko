@@ -20,3 +20,6 @@ ADD_EXECUTABLE(raw_sudoku_dlx_solver ${CMAKE_SOURCE_DIR}/test/sudoku_dlx_opt.cpp
 
 ADD_EXECUTABLE(sudoku_dlx_solve_one ${CMAKE_SOURCE_DIR}/test/sudoku_dlx_solve_one.cpp)
 target_link_libraries(sudoku_dlx_solve_one dancing_links)
+
+ADD_EXECUTABLE(sudoku_dlx_solve_all ${CMAKE_SOURCE_DIR}/test/sudoku_dlx_solve_all.cpp)
+target_link_libraries(sudoku_dlx_solve_all dancing_links)

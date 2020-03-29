@@ -1,4 +1,4 @@
-﻿#include "sudoku_dlx_solver.h"
+﻿#include <sudoku_dlx_solver.h>
 
 using namespace std;
 
@@ -17,7 +17,11 @@ int main()
     sudoku_dlx_solver cur_solver(instance);
 	cur_solver.set_debug(false);
     auto result = cur_solver.solve_one();
-    std::cout<<result<<std::endl;
+	if (result)
+	{
+		std::cout << result.value() << std::endl;
+	}
+    
 	std::cout << "solve one finish" << std::endl;
 	auto all_result = cur_solver.solve_all();
 	std::cout << "test case has " << all_result.size() << " solutions" << std::endl;
