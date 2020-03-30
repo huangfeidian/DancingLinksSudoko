@@ -1,9 +1,10 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <stack>
 #include <map>
 #include <ctime>
 #include <fstream>
+#include <string>
 using namespace std;
 #define shift_base 0x80000000
 struct basic_node
@@ -256,7 +257,7 @@ void insert_row(int current_row_index, int current_column_index, int value)
 	total_nodes[column_index].up = current_leftmost;
 	mutual_index[column_index].cul_value++;
 }
-void print_result()//打印出结果
+std::string result_to_line()
 {
 	int i, j, k, current_index;
 	int m, n;
@@ -270,19 +271,33 @@ void print_result()//打印出结果
 	}
 	for (m = 0; m < stack_index; m++)
 	{
-		current_index = node_stack[m]-node_stack[m]%4;
+		current_index = node_stack[m] - node_stack[m] % 4;
 		k = total_nodes[current_index].column % 9;
-		i = (total_nodes[current_index].column-total_nodes[current_index].column % 9)/9;
-		current_index ++;
-		j = (total_nodes[current_index].column - total_nodes[current_index].column % 9-81) / 9;
+		i = (total_nodes[current_index].column - total_nodes[current_index].column % 9) / 9;
+		current_index++;
+		j = (total_nodes[current_index].column - total_nodes[current_index].column % 9 - 81) / 9;
 		output[i][j] = k + 1;
 	}
-	printf("***********************\n");
+	std::string result(81, '0');
 	for (m = 0; m < 9; m++)
 	{
 		for (n = 0; n < 9; n++)
 		{
-			printf("%d ", output[m][n]);
+			result[m * 9 + n] = output[m][n] + '0';
+		}
+	}
+	return result;
+}
+void print_result()//打印出结果
+{
+	auto result_str = result_to_line();
+	printf("***********************\n");
+	int m, n;
+	for (m = 0; m < 9; m++)
+	{
+		for (n = 0; n < 9; n++)
+		{
+			printf("%d ", result_str[m* 9 + n]);
 		}
 		printf("\n");
 	}
@@ -469,9 +484,12 @@ int main()
 {
 	clock_t clock_one, clock_two, clock_three;
 	ifstream suduko_file("../data/sudoku.txt");
+	ofstream result_sudoku_file("sudoku_result_raw.txt");
 	char temp[82];
 	clock_one = clock();
 	int line = 1;
+	std::vector<std::string> total_result;
+	total_result.reserve(50000);
 	while (line!=49152)
 	{
 		suduko_file.getline(temp, 82);
@@ -484,8 +502,14 @@ int main()
 		}
 		creat_dlx_sudoku();
 		seek_sudoku();
+		total_result.push_back(result_to_line());
 		line++;
 	}
 	clock_three = clock();
+	for (const auto& one_line : total_result)
+	{
+		result_sudoku_file << one_line << endl;
+	}
+	result_sudoku_file.close();
 	printf("%d mscond passed in seek_sudoku\n", clock_three - clock_one);
 }
