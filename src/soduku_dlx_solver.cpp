@@ -7,13 +7,12 @@ sudoku_dlx_solver::sudoku_dlx_solver()
 {
 	row_header.reserve(400);
 	selected_nodes.reserve(100);
-	removed_rows.reserve(400);
     
 }
 void sudoku_dlx_solver::set_configure(const sudoku_configuration& configure)
 {
 	dancing_links_solver::reset_data();
-
+	std::vector<std::uint32_t> cur_col_desc(4, 0);
 	for (std::uint32_t i = 0; i < 9; i++)
 	{
 		for (std::uint32_t j = 0; j < 9; j++)
@@ -23,7 +22,7 @@ void sudoku_dlx_solver::set_configure(const sudoku_configuration& configure)
 			{
 				continue;
 			}
-			auto cur_col_desc = pos_val_to_row(i, j, cur_value);
+			pos_val_to_row(i, j, cur_value, cur_col_desc);
 			add_row(cur_col_desc);
 
 		}
@@ -49,7 +48,7 @@ void sudoku_dlx_solver::set_configure(const sudoku_configuration& configure)
 			}
 			for (std::uint32_t k = 1; k <= 9; k++)
 			{
-				auto cur_col_desc = pos_val_to_row(i, j, k);
+				pos_val_to_row(i, j, k, cur_col_desc);
 				bool invalid_val = false;
 				for (auto one_col : cur_col_desc)
 				{
@@ -70,9 +69,8 @@ void sudoku_dlx_solver::set_configure(const sudoku_configuration& configure)
 	//std::cout<<"after init nodes num is "<<_nodes.size() <<" row size is:" <<row_header.size()<<std::endl;
 
 }
-col_desc sudoku_dlx_solver::pos_val_to_row(std::uint32_t i, std::uint32_t j, std::uint8_t cur_value) const
+void sudoku_dlx_solver::pos_val_to_row(std::uint32_t i, std::uint32_t j, std::uint8_t cur_value, col_desc& cur_desc) const
 {
-	col_desc cur_desc(4, 0);
 	// position cover
 	cur_desc[0] = (1 + i * 9 + j);
 	// number in row cover
@@ -81,7 +79,6 @@ col_desc sudoku_dlx_solver::pos_val_to_row(std::uint32_t i, std::uint32_t j, std
 	cur_desc[2] = (163 + j * 9 + cur_value - 1);
 	// small square cover
 	cur_desc[3] = (244 + (((i / 3) * 3) + j / 3) * 9 + cur_value - 1);
-	return cur_desc;
 }
 
 sudoku_configuration sudoku_dlx_solver::col_desc_to_sudoku(const std::vector<std::uint32_t>& row_indexes) const

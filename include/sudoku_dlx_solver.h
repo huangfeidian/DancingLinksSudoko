@@ -47,5 +47,5 @@ public:
 	void set_configure(const sudoku_configuration& configure);
 
 private:
-	col_desc pos_val_to_row(std::uint32_t i, std::uint32_t j, std::uint8_t val) const;
+	void pos_val_to_row(std::uint32_t i, std::uint32_t j, std::uint8_t val, col_desc& result) const;
 };

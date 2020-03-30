@@ -24,11 +24,12 @@ protected:
     std::vector<std::uint32_t> col_counter;
 	bool debug_on = false;
 	std::vector<std::uint32_t> selected_nodes;// chosed node 
-	std::vector<std::vector<std::uint32_t>> removed_rows;
+	std::vector<std::uint32_t> removed_rows_total;
 	bool backtrace_flag = false;
     std::vector<std::uint32_t> avail_cols;
     std::uint32_t avail_col_idx = 0;
 	std::vector<std::uint32_t> tmp_removed_rows;
+	std::vector<std::uint32_t> remove_rows_accu_count;
 public:
     const std::uint32_t col_num;
     dancing_links_solver(std::uint32_t col_num, std::uint32_t reserve_node_num = 1000);
@@ -56,4 +57,6 @@ protected:
 
 	void reset_solution();
 	void reset_data();
+	void pop_remove_rows();
+	void push_remove_rows();
 };

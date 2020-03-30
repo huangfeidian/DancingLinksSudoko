@@ -22,8 +22,9 @@ dancing_links_solver::dancing_links_solver(std::uint32_t in_col_num, std::uint32
     _nodes[col_num].right = 0;
     row_header.push_back(0);
 	tmp_removed_rows.reserve(50);
-	removed_rows.reserve(col_num + 10);
+	removed_rows_total.reserve(col_num + 10);
 	selected_nodes.reserve(col_num + 10);
+	remove_rows_accu_count.reserve(col_num);
 }
 
 std::uint32_t dancing_links_solver::add_row(const col_desc& col_pos_indexes)
@@ -136,6 +137,7 @@ col_desc dancing_links_solver::row_to_col_desc(std::uint32_t row_idx) const
     col_desc result;
     auto row_node_begin = row_header[row_idx];
     auto row_node_end = _nodes[row_header[row_idx]].left;
+	result.reserve(row_node_end - row_node_begin + 1);
     for(auto node_idx = row_node_begin; node_idx <= row_node_end; node_idx++)
     {
         result.push_back(_nodes[node_idx].col);
@@ -183,7 +185,6 @@ std::uint32_t dancing_links_solver::pick_next_col()
 	return col_idx;
     
         
-    return col_idx;
 }
 std::vector<uint32_t> dancing_links_solver::solve_one()
 {
@@ -193,6 +194,7 @@ std::vector<uint32_t> dancing_links_solver::solve_one()
         return {};
     }
     std::vector<uint32_t> result;
+	result.reserve(selected_nodes.size());
     for(auto one_node_idx: selected_nodes)
     {
         const auto& cur_node = _nodes[one_node_idx];
@@ -216,14 +218,34 @@ void dancing_links_solver::backtrace_restore()
 		_nodes[cur_col_node.left].right = temp_col_idx;
 		_nodes[cur_col_node.right].left = temp_col_idx;
 	}
+	pop_remove_rows();
 
-	const auto& cur_removed_rows = removed_rows.back();
-	for (auto one_row_to_relink : cur_removed_rows)
+	
+}
+void dancing_links_solver::pop_remove_rows()
+{
+	auto after_total = remove_rows_accu_count.back();
+	remove_rows_accu_count.pop_back();
+	auto pre_total = 0;
+	if (remove_rows_accu_count.size())
 	{
-		relink_row(one_row_to_relink);
-		// print_row("backtrace", one_row_to_relink);
+		pre_total = remove_rows_accu_count.back();
 	}
-	removed_rows.pop_back();
+	for (std::uint32_t i = pre_total; i < after_total; i++)
+	{
+		relink_row(removed_rows_total[i]);
+	}
+}
+void dancing_links_solver::push_remove_rows()
+{
+	auto cur_row_count = tmp_removed_rows.size();
+	auto pre_total = 0;
+	if (remove_rows_accu_count.size())
+	{
+		pre_total = remove_rows_accu_count.back();
+	}
+	std::copy(tmp_removed_rows.begin(), tmp_removed_rows.end(), removed_rows_total.data() + pre_total);
+	remove_rows_accu_count.push_back(cur_row_count + pre_total);
 }
 bool dancing_links_solver::backtrace_and_choose_next()
 {
@@ -247,7 +269,7 @@ bool dancing_links_solver::backtrace_and_choose_next()
         // select next node for this col
         auto& next_node = _nodes[next_node_idx];
 		select_row(next_node.row);
-        removed_rows.push_back(tmp_removed_rows);
+		push_remove_rows();
         selected_nodes.push_back(next_node_idx);
 		//print_row("backtrace select", next_node.row);
     }
@@ -281,7 +303,7 @@ bool dancing_links_solver::solve_one_impl()
                 auto next_node_idx = _nodes[cur_col].down;
                 auto& next_node = _nodes[next_node_idx];
 				select_row(next_node.row);
-                removed_rows.push_back(tmp_removed_rows);
+				push_remove_rows();
 				//print_row("select", next_node.row);
                 selected_nodes.push_back(next_node_idx);
             }
@@ -372,14 +394,18 @@ void dancing_links_solver::reset_solution()
 	{
 		backtrace_restore();
 	}
+	if (removed_rows_total.size() < row_header.size())
+	{
+		removed_rows_total = std::vector<std::uint32_t>(row_header.size() + 100, 0);
+	}
 }
 void dancing_links_solver::reset_data()
 {
 	_nodes.clear();
 	row_header.clear();
 	selected_nodes.clear();
-	removed_rows.clear();
 	tmp_removed_rows.clear();
+	remove_rows_accu_count.clear();
 	for (auto& one_col : col_counter)
 	{
 		one_col = 0;
@@ -403,4 +429,5 @@ void dancing_links_solver::reset_data()
 	_nodes[0].left = col_num;
 	_nodes[col_num].right = 0;
 	row_header.push_back(0);
+	
 }
