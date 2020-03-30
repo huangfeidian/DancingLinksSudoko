@@ -1,5 +1,6 @@
 ﻿#include <dancing_links_solver.h>
 #include <iostream>
+#include <algorithm>
 dancing_links_solver::dancing_links_solver(std::uint32_t in_col_num, std::uint32_t in_reserve_node_num)
 : col_num(in_col_num)
 , col_counter(in_col_num + 1, 0)
