@@ -11,6 +11,7 @@ int main()
 	char temp[82];
 	clock_one = clock();
 	int line = 1;
+	sudoku_dlx_solver cur_solver;
 	while (line!= 49152)
 	{
 		suduko_file.getline(temp, 82);
@@ -22,7 +23,7 @@ int main()
 				instance.data[i][j] = temp[i * 9 + j] - '0';
 			}
 		}
-        sudoku_dlx_solver cur_solver(instance);
+		cur_solver.set_configure(instance);
         auto result = cur_solver.solve_one();
 		if (!result)
 		{

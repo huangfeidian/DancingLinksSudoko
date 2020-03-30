@@ -2,26 +2,32 @@
 
 using namespace std;
 
-sudoku_dlx_solver::sudoku_dlx_solver(const sudoku_configuration& configure)
+sudoku_dlx_solver::sudoku_dlx_solver()
 : dancing_links_solver(324, 2000)
 {
 	row_header.reserve(400);
 	selected_nodes.reserve(100);
 	removed_rows.reserve(400);
-    for(std::uint32_t i = 0; i< 9; i++)
-    {
-        for(std::uint32_t j = 0; j<9; j++)
-        {
-            auto cur_value = configure.data[i][j];
-            if(cur_value == 0)
-            {
+    
+}
+void sudoku_dlx_solver::set_configure(const sudoku_configuration& configure)
+{
+	dancing_links_solver::reset_data();
+
+	for (std::uint32_t i = 0; i < 9; i++)
+	{
+		for (std::uint32_t j = 0; j < 9; j++)
+		{
+			auto cur_value = configure.data[i][j];
+			if (cur_value == 0)
+			{
 				continue;
-            }
+			}
 			auto cur_col_desc = pos_val_to_row(i, j, cur_value);
 			add_row(cur_col_desc);
-			
-        }
-    }
+
+		}
+	}
 	//std::vector<std::uint32_t> pre_config;
 	//for (int i = 1; i < row_header.size(); i++)
 	//{
@@ -61,8 +67,8 @@ sudoku_dlx_solver::sudoku_dlx_solver(const sudoku_configuration& configure)
 
 		}
 	}
-	
-    //std::cout<<"after init nodes num is "<<_nodes.size() <<" row size is:" <<row_header.size()<<std::endl;
+	//std::cout<<"after init nodes num is "<<_nodes.size() <<" row size is:" <<row_header.size()<<std::endl;
+
 }
 col_desc sudoku_dlx_solver::pos_val_to_row(std::uint32_t i, std::uint32_t j, std::uint8_t cur_value) const
 {
@@ -156,3 +162,4 @@ void sudoku_dlx_solver::print_select_nodes(const std::vector<std::uint32_t>& cur
 	std::cout <<cur_config<< std::endl;
 
 }
+

@@ -28,6 +28,7 @@ protected:
 	bool backtrace_flag = false;
     std::vector<std::uint32_t> avail_cols;
     std::uint32_t avail_col_idx = 0;
+	std::vector<std::uint32_t> tmp_removed_rows;
 public:
     const std::uint32_t col_num;
     dancing_links_solver(std::uint32_t col_num, std::uint32_t reserve_node_num = 1000);
@@ -44,14 +45,15 @@ protected:
     std::uint32_t pick_next_col(); //select col which has the smallest col count return 0 if fail
     
     // remove all rows of current column except the row _nodes[node_idx].row
-    void unlink_col(std::uint32_t node_idx, std::vector<std::uint32_t>& remove_rows);
+    void unlink_col(std::uint32_t node_idx);
     // remove all rows that share column with current row_idx
     // row_idx remove at the last
     // return the reverse order of removed rows, for the convinience of relink
-    std::vector<std::uint32_t> select_row(std::uint32_t row_idx);
+    void select_row(std::uint32_t row_idx);
     bool solve_one_impl();
     bool backtrace_and_choose_next();
 	void backtrace_restore();
 
-	void reset();
+	void reset_solution();
+	void reset_data();
 };

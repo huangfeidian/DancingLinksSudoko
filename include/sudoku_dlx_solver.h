@@ -37,12 +37,15 @@ struct sudoku_configuration
 class sudoku_dlx_solver: public dancing_links_solver
 {
 public:
-    sudoku_dlx_solver(const sudoku_configuration& configure);
+    sudoku_dlx_solver();
     std::optional<sudoku_configuration> solve_one();
     std::vector<sudoku_configuration> solve_all();
     sudoku_configuration col_desc_to_sudoku(const std::vector<std::uint32_t>& row_indexes) const;
 	void print_row(const std::string& prefix, std::uint32_t row_idx) const;
 	void print_select_nodes(const std::vector<std::uint32_t>& cur_selected_nodes) const;
+	void reset_data(const sudoku_configuration& configure);
+	void set_configure(const sudoku_configuration& configure);
+
 private:
 	col_desc pos_val_to_row(std::uint32_t i, std::uint32_t j, std::uint8_t val) const;
 };

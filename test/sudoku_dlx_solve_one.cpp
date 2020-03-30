@@ -14,7 +14,8 @@ int main()
         }
     }
 	cout << instance << endl;
-    sudoku_dlx_solver cur_solver(instance);
+    sudoku_dlx_solver cur_solver;
+	cur_solver.set_configure(instance);
 	cur_solver.set_debug(false);
     auto result = cur_solver.solve_one();
 	if (result)
