@@ -5,6 +5,8 @@
 #include <ctime>
 #include <fstream>
 #include <string>
+#include <array_heap.h>
+
 using namespace std;
 #define shift_base 0x80000000
 struct basic_node
@@ -18,15 +20,9 @@ struct basic_node total_nodes[324 + 81 * 9 * 4];//324个头节点，81个格子�
 int avail_node_index = 324;//分配节点时的编号
 int node_stack[81];
 int stack_index = 0;
-struct node_heap
-{
-	int cul_value;//代表这个列中的1的个数
-	int position_index;//代表着个点所指示的列的索引
-};
-struct node_heap mutual_index[324];//这个是堆
-int current_heap_number = 323;//这个是当前可用的堆中的节点数
+
 int available_column = 323;//这个是当前可用列数
-int position_index[324];//这个是列在堆中的位置
+array_heap cur_heap(324);
 int out[9][9] = { { 8, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 3, 6, 0, 0, 0, 0, 0 }, { 0, 7, 0, 0, 9, 0, 2, 0, 0 }, \
 {0, 5, 0, 0, 0, 7, 0, 0, 0}, { 0, 0, 0, 0, 4, 5, 7, 0, 0 }, { 0, 0, 0, 1, 0, 0, 0, 3, 0 }, { 0, 0, 1, 0, 0, 0, 0, 6, 8 }, \
 {0, 0, 8, 5, 0, 0, 0, 1, 0}, { 0, 9, 0, 0, 0, 0, 4, 0, 0 } };
@@ -38,187 +34,48 @@ void initial(void)
 		total_nodes[i].column = i;
 		total_nodes[i].down = i;
 		total_nodes[i].up = i;
-		mutual_index[i].cul_value= 0;
-		mutual_index[i].position_index = i;
-		position_index[i] = i;
+		
 	}
+	cur_heap.reset();
 	stack_index = 0;
 	available_column = 323;
-	current_heap_number = 323;
 	avail_node_index = 324;
 }
-void swap_heap(int index_one, int index_two)//交换在堆中的两个元素的值，及相关数据索引
+void print_heap()
 {
-	int intermidate_one, intermidate_two;
-	intermidate_one = mutual_index[index_one].cul_value;
-	intermidate_two = mutual_index[index_one].position_index;
-	mutual_index[index_one].cul_value = mutual_index[index_two].cul_value;
-	mutual_index[index_one].position_index = mutual_index[index_two].position_index;
-	mutual_index[index_two].cul_value = intermidate_one;
-	mutual_index[index_two].position_index = intermidate_two;
-	position_index[mutual_index[index_two].position_index] = index_two;
-	position_index[mutual_index[index_one].position_index] = index_one;
+	std::cout << cur_heap<<std::endl;
 }
-void heap_initial()//初始化堆，这个动作是在所有的行插入完成之后做的
-{
-	int k, i = 0;
-	int current_min;
-	for (i = (current_heap_number - 1) / 2; i >= 0; i--)
-	{
-		k = i;
-		while (2 * k + 1 <= current_heap_number)
-		{
-			current_min = mutual_index[k].cul_value;
-			current_min = current_min < mutual_index[2 * k + 1].cul_value ? current_min : mutual_index[2 * k + 1].cul_value;
-			if (2 * k + 2 <= current_heap_number)
-			{
-				current_min = current_min < mutual_index[2 * k + 2].cul_value ? current_min : mutual_index[2 * k + 2].cul_value;
-			}
-			if (current_min == mutual_index[k].cul_value)
-			{
-				break;
-			}
-			else
-			{
-				if (current_min == mutual_index[2 * k + 1].cul_value)
-				{
-					swap_heap(k, 2 * k + 1);
-					k = 2 * k + 1;
-				}
-				else
-				{
-					swap_heap(k, 2 * k + 2);
-					k = 2 * k + 2;
-				}
-			}
-		}
-	}
-}
-void delete_minimal()//删除堆中最小的元素
-{
-	int k;
-	int current_min;
-	if (current_heap_number != 0)
-	{
-		swap_heap(0, current_heap_number);//交换最高元素与最低元素
-		current_heap_number--;//然后将堆的大小进行缩减
-		k = 0;
-		while (2 * k + 1 <= current_heap_number)//然后，下面便是一些维护性的工作，用来维护最小堆
-		{
-			current_min = mutual_index[k].cul_value;
-			current_min = current_min < mutual_index[2 * k + 1].cul_value ? current_min : mutual_index[2 * k + 1].cul_value;
-			if (2 * k + 2 <= current_heap_number)
-			{
-				current_min = current_min < mutual_index[2 * k + 2].cul_value ? current_min : mutual_index[2 * k + 2].cul_value;
-			}
-			if (current_min == mutual_index[k].cul_value)
-			{
-				return;
-			}
-			else
-			{
-				if (current_min == mutual_index[2 * k + 1].cul_value)
-				{
-					swap_heap(k, 2 * k + 1);
-					k = 2 * k + 1;
-				}
-				else
-				{
-					swap_heap(k, 2 * k + 2);
-					k = 2 * k + 2;
-				}
-			}
-		}
-	}
-	else//如果只剩下一个元素，那就不需要进行交换，直接将堆元素的个数降低一
-	{
-		current_heap_number = -1;
-	}
-}
-void heap_renew(int target_position, int new_value)//对于第target_position列，进行度数更新
-{
-	int heap_target_position, k, current_min;
-	heap_target_position = position_index[target_position];//这个是这一列在堆中所在的位置
-	k = heap_target_position;
-	if (new_value < mutual_index[k].cul_value)//如果值是减少的，就直接进行赋值，然后维护堆的性质
-	{
-		mutual_index[k].cul_value = new_value;
-		while (k > 0 && (mutual_index[(k - 1) / 2].cul_value > mutual_index[k].cul_value))//维护堆
-		{
-			swap_heap((k - 1) / 2, k);
-			k = (k - 1) / 2;
-		}
-		if (new_value == 0)//如果是赋值为0，则从堆中进行删除，因为我们每次操纵一个元素，所以最多会有一个元素为0，所以肯定是最小值。
-		{
-			delete_minimal();
-		}
-	}
-	else//对于值增大的情况
-	{
-		mutual_index[k].cul_value = new_value;
-		if (new_value == 1)//如果新的值是1，则把这个元素重新加入堆中
-		{
-			current_heap_number++;//扩大堆的范围，我们可以证明重新加入堆中的元素一定是排在堆的末尾，当然条件是删除与插入的顺序是对应相反的
-			while (k > 0 && (mutual_index[(k - 1) / 2].cul_value > mutual_index[k].cul_value))//由于新的值是1，所以不可能比上一个数大
-			{
-				swap_heap((k - 1) / 2, k);
-				k = (k - 1) / 2;
-			}
-		}
-		else//如果不是1，说明已经在堆中，所以不需要扩大堆的范围，直接赋值之后进行维护堆结构就行
-		{
-			while (2 * k + 1 <= current_heap_number)
-			{
-				current_min = mutual_index[k].cul_value;
-				current_min = current_min < mutual_index[2 * k + 1].cul_value ? current_min : mutual_index[2 * k + 1].cul_value;
-				if (2 * k + 2 <= current_heap_number)
-				{
-					current_min = current_min < mutual_index[2 * k + 2].cul_value ? current_min : mutual_index[2 * k + 2].cul_value;
-				}
-				if (current_min == mutual_index[k].cul_value)
-				{
-					break;
-				}
-				else
-				{
-					if (current_min == mutual_index[2 * k + 1].cul_value)
-					{
-						swap_heap(k, 2 * k + 1);
-						k = 2 * k + 1;
-					}
-					else
-					{
-						swap_heap(k, 2 * k + 2);
-						k = 2 * k + 2;
-					}
-				}
-			}
-		}
-	}
-}
+
+
+
+
+
+
+
 void node_heap_decrease(int node_index)//对于一个点进行她所在的行的删除，因为一行中一定有四个元素，所以有四列，我们对这四列的度数都进行减少1
 {
 	int leftmost_node;//当前节点所在行的最左节点的索引
 	leftmost_node = node_index - (node_index % 4);
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value -1);
+	cur_heap.update_by_dec(total_nodes[leftmost_node].column);
 	leftmost_node++;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value -1);
+	cur_heap.update_by_dec(total_nodes[leftmost_node].column);
 	leftmost_node++;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value -1);
+	cur_heap.update_by_dec(total_nodes[leftmost_node].column);
 	leftmost_node++;
-	heap_renew(total_nodes[leftmost_node].column, mutual_index[position_index[total_nodes[leftmost_node].column]].cul_value -1);
+	cur_heap.update_by_dec(total_nodes[leftmost_node].column);
 }
 void node_heap_increase(int node_index)//增加与减少的顺序是刚好相反的
 {
 	int rightmost_node;//当前节点所在行的最右节点的索引
 	rightmost_node = node_index - (node_index % 4)+3;
-	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	cur_heap.update_by_inc(total_nodes[rightmost_node].column);
 	rightmost_node--;
-	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	cur_heap.update_by_inc(total_nodes[rightmost_node].column);
 	rightmost_node--;
-	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	cur_heap.update_by_inc(total_nodes[rightmost_node].column);
 	rightmost_node--;
-	heap_renew(total_nodes[rightmost_node].column, mutual_index[position_index[total_nodes[rightmost_node].column]].cul_value + 1);
+	cur_heap.update_by_inc(total_nodes[rightmost_node].column);
+
 }
 void insert_row(int current_row_index, int current_column_index, int value)
 {
@@ -231,7 +88,7 @@ void insert_row(int current_row_index, int current_column_index, int value)
 	total_nodes[current_leftmost].up = total_nodes[column_index].up;
 	total_nodes[total_nodes[column_index].up].down = current_leftmost;
 	total_nodes[column_index].up = current_leftmost;
-	mutual_index[column_index].cul_value++;
+	cur_heap.update_by_inc(column_index);
 	current_leftmost++;
 	column_index = 81 + current_column_index * 9 + value - 1;
 	total_nodes[current_leftmost].column = column_index;
@@ -239,7 +96,7 @@ void insert_row(int current_row_index, int current_column_index, int value)
 	total_nodes[current_leftmost].up = total_nodes[column_index].up;
 	total_nodes[total_nodes[column_index].up].down = current_leftmost;
 	total_nodes[column_index].up = current_leftmost;
-	mutual_index[column_index].cul_value++;
+	cur_heap.update_by_inc(column_index);
 	current_leftmost++;
 	column_index= 162 + ((current_row_index / 3) * 3 + current_column_index / 3) * 9 + value - 1;
 	total_nodes[current_leftmost].column = column_index;
@@ -247,7 +104,8 @@ void insert_row(int current_row_index, int current_column_index, int value)
 	total_nodes[current_leftmost].up = total_nodes[column_index].up;
 	total_nodes[total_nodes[column_index].up].down = current_leftmost;
 	total_nodes[column_index].up = current_leftmost;
-	mutual_index[column_index].cul_value++;
+	cur_heap.update_by_inc(column_index);
+
 	current_leftmost++;
 	column_index = 243 + current_row_index * 9 + current_column_index;
 	total_nodes[current_leftmost].column = column_index;
@@ -255,7 +113,8 @@ void insert_row(int current_row_index, int current_column_index, int value)
 	total_nodes[current_leftmost].up = total_nodes[column_index].up;
 	total_nodes[total_nodes[column_index].up].down = current_leftmost;
 	total_nodes[column_index].up = current_leftmost;
-	mutual_index[column_index].cul_value++;
+	cur_heap.update_by_inc(column_index);
+
 }
 std::string result_to_line()
 {
@@ -297,9 +156,9 @@ void print_result()//打印出结果
 	{
 		for (n = 0; n < 9; n++)
 		{
-			printf("%d ", result_str[m* 9 + n]);
+			std::cout<<result_str[m* 9 + n];
 		}
-		printf("\n");
+		std::cout << std::endl;
 	}
 }
 
@@ -356,7 +215,6 @@ void creat_dlx_sudoku()//利用矩阵来建立十字网格
 			}
 		}
 	}
-	heap_initial();
 }
 void in_stack(int target_to_stack)
 {
@@ -365,6 +223,7 @@ void in_stack(int target_to_stack)
 	{
 		int current_column_traversal = leftmost + i;
 		current_column_traversal = total_nodes[current_column_traversal].down;
+		//std::cout << "try to remove col" << total_nodes[current_column_traversal].column << std::endl;
 		while (current_column_traversal != leftmost + i)//删除当前列相交的行
 		{
 			if (current_column_traversal != total_nodes[current_column_traversal].column)//即不是头行
@@ -387,6 +246,7 @@ void in_stack(int target_to_stack)
 	node_heap_decrease(target_to_stack);//最后对当前行进行删除
 	node_stack[stack_index++] = target_to_stack;//然后才是入栈
 	available_column -= 4;
+	//print_heap();
 	//print_result();
 }
 void out_stack()//注意出栈的时候是相反的操作，所有删除都相反
@@ -424,7 +284,7 @@ int find_next()//用来找下一个可以入栈的元素，如果无法入栈或
 {
 	int target_position;
 	int temp_node_one;
-	if (available_column == current_heap_number)
+	if (available_column + 1 == cur_heap.remain_size())
 	{
 		if (available_column == -1)
 		{
@@ -433,7 +293,7 @@ int find_next()//用来找下一个可以入栈的元素，如果无法入栈或
 		}
 		else
 		{
-			target_position = mutual_index[0].position_index;
+			target_position = cur_heap.top();
 			temp_node_one = total_nodes[target_position].down;
 			in_stack(temp_node_one);
 			return 1;
@@ -446,6 +306,7 @@ int find_next()//用来找下一个可以入栈的元素，如果无法入栈或
 }
 void seek_sudoku()
 {
+	//print_heap();
 	int find_result = 0;
 	int temp_node_one;
 	while (1)
@@ -490,7 +351,7 @@ int main()
 	int line = 1;
 	std::vector<std::string> total_result;
 	total_result.reserve(50000);
-	while (line!=49152)
+	while (line!= 49152)
 	{
 		suduko_file.getline(temp, 82);
 		for (int i = 0; i < 9; i++)

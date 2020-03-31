@@ -23,7 +23,7 @@ int main()
 		std::cout << result.value() << std::endl;
 	}
     
-	std::cout << "solve one finish" << std::endl;
+	std::cout << "solve one finish with pick counter " <<cur_solver.pick_col_counter<< std::endl;
 	auto all_result = cur_solver.solve_all();
 	std::cout << "test case has " << all_result.size() << " solutions" << std::endl;
 	for (const auto& one_solution : all_result)
@@ -32,5 +32,6 @@ int main()
 		std::cout << one_solution << std::endl;
 
 	}
+
 
 }

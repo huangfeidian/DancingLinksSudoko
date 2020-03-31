@@ -33,5 +33,5 @@ int main()
 		line++;
 	}
 	clock_three = clock();
-    cout<<"solver all sudoku in "<<clock_three - clock_one<<"ms"<<endl;
+    cout<<"solver all sudoku in "<<clock_three - clock_one<<"ms with pick col counter "<< cur_solver.pick_col_counter<< endl;
 }

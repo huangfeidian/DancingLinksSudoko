@@ -40,6 +40,7 @@ public:
 	virtual void print_select_nodes(const std::vector<std::uint32_t>& cur_selected_nodes) const;
     col_desc row_to_col_desc(std::uint32_t row_idx) const;
 	void set_debug(bool debug_flag);
+	std::uint32_t pick_col_counter = 0;
 protected:
     void unlink_row(std::uint32_t row_idx);
     void relink_row(std::uint32_t row_idx);

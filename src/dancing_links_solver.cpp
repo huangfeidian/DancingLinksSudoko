@@ -151,6 +151,7 @@ std::uint32_t dancing_links_solver::pick_next_col()
     std::uint32_t i = 0;
 	std::uint32_t pre_min_value = 0;
 	auto col_counter_p = col_counter.data();
+	pick_col_counter++;
     while(i < avail_col_idx)
     {
 		auto cur_col = avail_cols[i];
