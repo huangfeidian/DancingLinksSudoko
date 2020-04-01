@@ -66,14 +66,18 @@ void array_heap::swap_node(std::uint32_t index_one, std::uint32_t index_two)
 	{
 		return;
 	}
-	auto& node_one = _nodes[index_one];
-	auto& node_two = _nodes[index_two];
 
 
-	auto mutual_idx_1 = node_one.mutual_idx;
-	auto mutual_idx_2 = node_two.mutual_idx;
-	std::swap(node_one, node_two);
-	std::swap(mutual_idxes[mutual_idx_1], mutual_idxes[mutual_idx_2]);
+	std::uint32_t intermidate_one, intermidate_two;
+	intermidate_one = _nodes[index_one].value;
+	intermidate_two = _nodes[index_one].mutual_idx;
+
+	_nodes[index_one].value = _nodes[index_two].value;
+	_nodes[index_one].mutual_idx = _nodes[index_two].mutual_idx;
+	_nodes[index_two].value = intermidate_one;
+	_nodes[index_two].mutual_idx = intermidate_two;
+	mutual_idxes[_nodes[index_two].mutual_idx] = index_two;
+	mutual_idxes[_nodes[index_one].mutual_idx] = index_one;
 }
 std::uint32_t array_heap::top() const
 {
