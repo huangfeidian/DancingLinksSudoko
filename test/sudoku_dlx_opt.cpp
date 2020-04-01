@@ -20,7 +20,7 @@ struct basic_node total_nodes[324 + 81 * 9 * 4];//324个头节点，81个格子�
 int avail_node_index = 324;//分配节点时的编号
 int node_stack[81];
 int stack_index = 0;
-
+std::uint32_t column_counter[324] = { 0 };
 int available_column = 323;//这个是当前可用列数
 array_heap cur_heap(324);
 int out[9][9] = { { 8, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 3, 6, 0, 0, 0, 0, 0 }, { 0, 7, 0, 0, 9, 0, 2, 0, 0 }, \
@@ -34,9 +34,9 @@ void initial(void)
 		total_nodes[i].column = i;
 		total_nodes[i].down = i;
 		total_nodes[i].up = i;
+		column_counter[i] = 0;
 		
 	}
-	cur_heap.reset();
 	stack_index = 0;
 	available_column = 323;
 	avail_node_index = 324;
@@ -77,45 +77,36 @@ void node_heap_increase(int node_index)//增加与减少的顺序是刚好相反
 	cur_heap.update_by_inc(total_nodes[rightmost_node].column);
 
 }
+void insert_one_node(std::uint32_t node_idx, std::uint32_t column_index)
+{
+	auto& cur_node = total_nodes[node_idx];
+	cur_node.column = column_index;
+	cur_node.down = column_index;
+	cur_node.up = total_nodes[column_index].up;
+	total_nodes[total_nodes[column_index].up].down = node_idx;
+	total_nodes[column_index].up = node_idx;
+	column_counter[column_index]++;
+}
 void insert_row(int current_row_index, int current_column_index, int value)
 {
 	int current_leftmost = avail_node_index;
 	avail_node_index += 4;
 	int column_index;
 	column_index = current_row_index * 9 + value - 1;
-	total_nodes[current_leftmost].column = column_index;
-	total_nodes[current_leftmost].down = column_index;
-	total_nodes[current_leftmost].up = total_nodes[column_index].up;
-	total_nodes[total_nodes[column_index].up].down = current_leftmost;
-	total_nodes[column_index].up = current_leftmost;
-	cur_heap.update_by_inc(column_index);
+	insert_one_node(current_leftmost, column_index);
 	current_leftmost++;
 	column_index = 81 + current_column_index * 9 + value - 1;
-	total_nodes[current_leftmost].column = column_index;
-	total_nodes[current_leftmost].down = column_index;
-	total_nodes[current_leftmost].up = total_nodes[column_index].up;
-	total_nodes[total_nodes[column_index].up].down = current_leftmost;
-	total_nodes[column_index].up = current_leftmost;
-	cur_heap.update_by_inc(column_index);
+	insert_one_node(current_leftmost, column_index);
 	current_leftmost++;
 	column_index= 162 + ((current_row_index / 3) * 3 + current_column_index / 3) * 9 + value - 1;
-	total_nodes[current_leftmost].column = column_index;
-	total_nodes[current_leftmost].down = column_index;
-	total_nodes[current_leftmost].up = total_nodes[column_index].up;
-	total_nodes[total_nodes[column_index].up].down = current_leftmost;
-	total_nodes[column_index].up = current_leftmost;
-	cur_heap.update_by_inc(column_index);
+	insert_one_node(current_leftmost, column_index);
 
 	current_leftmost++;
 	column_index = 243 + current_row_index * 9 + current_column_index;
-	total_nodes[current_leftmost].column = column_index;
-	total_nodes[current_leftmost].down = column_index;
-	total_nodes[current_leftmost].up = total_nodes[column_index].up;
-	total_nodes[total_nodes[column_index].up].down = current_leftmost;
-	total_nodes[column_index].up = current_leftmost;
-	cur_heap.update_by_inc(column_index);
+	insert_one_node(current_leftmost, column_index);
 
 }
+
 std::string result_to_line()
 {
 	int i, j, k, current_index;
@@ -215,6 +206,8 @@ void creat_dlx_sudoku()//利用矩阵来建立十字网格
 			}
 		}
 	}
+	cur_heap.set_data(column_counter);
+
 }
 void in_stack(int target_to_stack)
 {
@@ -351,7 +344,9 @@ int main()
 	int line = 1;
 	std::vector<std::string> total_result;
 	total_result.reserve(50000);
-	while (line!= 49152)
+	std::uint32_t case_size = 49152;
+	//case_size = 2;
+	while (line!= case_size)
 	{
 		suduko_file.getline(temp, 82);
 		for (int i = 0; i < 9; i++)

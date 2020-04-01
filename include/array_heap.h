@@ -23,6 +23,7 @@ public:
     void pop();
     friend std::ostream& operator<<(std::ostream& output, const array_heap& data);
 	void reset();
+	void set_data(const std::uint32_t* _init_values);
 private:
     void swap_node(std::uint32_t index_1, std::uint32_t index_2);
     std::uint32_t avail_size = 0;
