@@ -16,8 +16,8 @@ add_library(dancing_links ${DLX_SRCS})
 ADD_EXECUTABLE(matrix_solver ${CMAKE_SOURCE_DIR}/test/basic_matrix_solver.cpp)
 target_link_libraries(matrix_solver dancing_links)
 
-ADD_EXECUTABLE(raw_sudoku_dlx_solver ${CMAKE_SOURCE_DIR}/test/sudoku_dlx_opt.cpp)
-target_link_libraries(raw_sudoku_dlx_solver dancing_links)
+ADD_EXECUTABLE(sudoku_dlx_heap_test ${CMAKE_SOURCE_DIR}/test/sudoku_dlx_heap_test.cpp)
+target_link_libraries(sudoku_dlx_heap_test dancing_links)
 
 ADD_EXECUTABLE(sudoku_dlx_solve_one ${CMAKE_SOURCE_DIR}/test/sudoku_dlx_solve_one.cpp)
 target_link_libraries(sudoku_dlx_solve_one dancing_links)
