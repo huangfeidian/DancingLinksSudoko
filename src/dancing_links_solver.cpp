@@ -1,10 +1,12 @@
 ﻿#include <dancing_links_solver.h>
 #include <iostream>
 #include <algorithm>
-dancing_links_solver::dancing_links_solver(std::uint32_t in_col_num, std::uint32_t in_reserve_node_num)
+dancing_links_solver::dancing_links_solver(std::uint32_t in_col_num, bool in_use_dlx_heap, std::uint32_t in_reserve_node_num)
 : col_num(in_col_num)
 , col_counter(in_col_num + 1, 0)
 , avail_cols(in_col_num, 0)
+, use_heap_dlx(in_use_dlx_heap)
+, col_count_heap(in_col_num + 1)
 {
     _nodes.reserve(in_reserve_node_num);
     for(std::uint32_t i = 0; i< col_num + 1; i++)
@@ -25,6 +27,8 @@ dancing_links_solver::dancing_links_solver(std::uint32_t in_col_num, std::uint32
 	removed_rows_total.reserve(col_num + 10);
 	selected_nodes.reserve(col_num + 10);
 	remove_rows_accu_count.reserve(col_num);
+    col_count_heap.reset(0);
+    col_count_heap.update(0, std::numeric_limits<std::uint32_t>::max());
 }
 
 std::uint32_t dancing_links_solver::add_row(const col_desc& col_pos_indexes)
@@ -68,12 +72,20 @@ void dancing_links_solver::relink_row(std::uint32_t row_idx)
 		_nodes[temp_node.up].down = i;
 		_nodes[temp_node.down].up = i;
         col_counter[one_col]++;
-        if(col_counter[one_col] == 1)
+        if (use_heap_dlx)
         {
-            avail_cols[avail_col_idx] = one_col;
-            avail_col_idx++;
-			//std::cout << "avail_col_idx add to " << avail_col_idx << " for col " << one_col << std::endl;
+            col_count_heap.update(one_col, col_counter[one_col]);
         }
+        else
+        {
+            if (col_counter[one_col] == 1)
+            {
+                avail_cols[avail_col_idx] = one_col;
+                avail_col_idx++;
+                //std::cout << "avail_col_idx add to " << avail_col_idx << " for col " << one_col << std::endl;
+            }
+        }
+        
     }
 }
 void dancing_links_solver::unlink_row(std::uint32_t row_idx)
@@ -88,6 +100,14 @@ void dancing_links_solver::unlink_row(std::uint32_t row_idx)
         _nodes[temp_node.up].down = temp_node.down;
         _nodes[temp_node.down].up = temp_node.up;
         col_counter[one_col]--;
+        if (use_heap_dlx)
+        {
+            col_count_heap.update(one_col, col_counter[one_col]);
+            if (col_counter[one_col] == 0)
+            {
+                col_count_heap.pop();
+            }
+        }
     }
 }
 
@@ -152,38 +172,47 @@ std::uint32_t dancing_links_solver::pick_next_col()
 	std::uint32_t pre_min_value = 0;
 	auto col_counter_p = col_counter.data();
 	pick_col_counter++;
-    while(i < avail_col_idx)
+    if (use_heap_dlx)
     {
-		auto cur_col = avail_cols[i];
-		auto cur_col_counter = col_counter_p[cur_col];
-        if(cur_col_counter == 0)
+        auto cur_top = col_count_heap.top();
+        return cur_top.mutual_idx;
+    }
+    else
+    {
+        while (i < avail_col_idx)
         {
-            
-            avail_col_idx--;
-			//std::cout << "avail_col_idx dec to " << avail_col_idx << " for col " << avail_cols[i] << std::endl;
-			std::swap(avail_cols[i], avail_cols[avail_col_idx]);
-        }
-        else
-        {
-            if(col_idx == 0)
+            auto cur_col = avail_cols[i];
+            auto cur_col_counter = col_counter_p[cur_col];
+            if (cur_col_counter == 0)
             {
-                col_idx = cur_col;
-				pre_min_value = cur_col_counter;
+
+                avail_col_idx--;
+                //std::cout << "avail_col_idx dec to " << avail_col_idx << " for col " << avail_cols[i] << std::endl;
+                std::swap(avail_cols[i], avail_cols[avail_col_idx]);
             }
             else
             {
-				if (pre_min_value > cur_col_counter)
-				{
-					col_idx = cur_col;
-					pre_min_value = cur_col_counter;
-				}
+                if (col_idx == 0)
+                {
+                    col_idx = cur_col;
+                    pre_min_value = cur_col_counter;
+                }
+                else
+                {
+                    if (pre_min_value > cur_col_counter)
+                    {
+                        col_idx = cur_col;
+                        pre_min_value = cur_col_counter;
+                    }
+                }
+                i++;
+
             }
-            i++;
-            
+
         }
-        
+        return col_idx;
     }
-	return col_idx;
+    
     
         
 }
@@ -282,7 +311,10 @@ bool dancing_links_solver::solve_one_impl()
     while(_nodes[0].right != 0)
     {
 		auto cur_col = pick_next_col();
-		print_select_nodes(selected_nodes);
+        if (cur_col)
+        {
+            print_select_nodes(selected_nodes);
+        }
         if(backtrace_flag)
         {
             backtrace_flag = false;
@@ -416,6 +448,8 @@ void dancing_links_solver::reset_data()
 	{
 		one_col = 0;
 	}
+    col_count_heap.reset(0);
+    col_count_heap.update(0, std::numeric_limits<std::uint32_t>::max());
 	for (std::uint32_t i = 0; i < col_num + 1; i++)
 	{
 		dancing_links_node temp_node;

@@ -16,26 +16,13 @@ void test_case(array_heap<std::uint32_t>& cur_heap, std::uint32_t pos, bool is_i
 }
 int main()
 {
-    array_heap<std::uint32_t> cur_heap(4);
+    std::size_t len = 10;
+    array_heap<std::uint32_t> cur_heap(len);
     cur_heap.reset(0);
-	test_case(cur_heap, 0, true);
-	test_case(cur_heap, 0, true);
-	test_case(cur_heap, 0, true);
-    test_case(cur_heap, 1, true);
-    test_case(cur_heap, 2, true);
-    test_case(cur_heap, 3, true);
-    test_case(cur_heap, 1, true);
-    test_case(cur_heap, 2, true);
-    test_case(cur_heap, 1, true);
-    test_case(cur_heap, 3, false);
-    test_case(cur_heap, 2, false);
-    test_case(cur_heap, 1, false);
-    test_case(cur_heap, 1, false);
-    test_case(cur_heap, 1, false);
-    test_case(cur_heap, 2, false);
-	test_case(cur_heap, 0, false);
-	test_case(cur_heap, 0, false);
-	test_case(cur_heap, 0, false);
+    for (int i = 0; i < len; i++)
+    {
+        cur_heap.update(i, len - i);
+    }
 
 
 }

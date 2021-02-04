@@ -2,8 +2,8 @@
 
 using namespace std;
 
-sudoku_dlx_solver::sudoku_dlx_solver()
-: dancing_links_solver(324, 2000)
+sudoku_dlx_solver::sudoku_dlx_solver(bool use_dlx_heap)
+: dancing_links_solver(324, use_dlx_heap, 2000)
 {
 	row_header.reserve(400);
 	selected_nodes.reserve(100);
@@ -64,6 +64,13 @@ void sudoku_dlx_solver::set_configure(const sudoku_configuration& configure)
 				}
 			}
 
+		}
+	}
+	if (use_heap_dlx)
+	{
+		while (col_count_heap.top().value == 0)
+		{
+			col_count_heap.pop();
 		}
 	}
 	//std::cout<<"after init nodes num is "<<_nodes.size() <<" row size is:" <<row_header.size()<<std::endl;

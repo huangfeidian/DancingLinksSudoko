@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+#include <array_heap.h>
+
 struct dancing_links_node
 {
     std::uint32_t up;
@@ -30,9 +32,11 @@ protected:
     std::uint32_t avail_col_idx = 0;
 	std::vector<std::uint32_t> tmp_removed_rows;
 	std::vector<std::uint32_t> remove_rows_accu_count;
+    array_heap<std::uint32_t> col_count_heap;
+    const bool use_heap_dlx;
 public:
     const std::uint32_t col_num;
-    dancing_links_solver(std::uint32_t col_num, std::uint32_t reserve_node_num = 1000);
+    dancing_links_solver(std::uint32_t col_num, bool use_heap_dlx, std::uint32_t reserve_node_num = 1000);
     std::uint32_t add_row(const col_desc& col_pos_idxes);
     std::vector<uint32_t> solve_one();
     std::vector<std::vector<uint32_t>> solve_all();

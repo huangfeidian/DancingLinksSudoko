@@ -11,7 +11,7 @@ int main()
 	char temp[82];
 	clock_one = clock();
 	int line = 1;
-	sudoku_dlx_solver cur_solver;
+	sudoku_dlx_solver cur_solver(true);
 	while (line!= 49152)
 	{
 		suduko_file.getline(temp, 82);

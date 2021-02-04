@@ -37,7 +37,7 @@ struct sudoku_configuration
 class sudoku_dlx_solver: public dancing_links_solver
 {
 public:
-    sudoku_dlx_solver();
+    sudoku_dlx_solver(bool use_dlx_heap = false);
     std::optional<sudoku_configuration> solve_one();
     std::vector<sudoku_configuration> solve_all();
     sudoku_configuration col_desc_to_sudoku(const std::vector<std::uint32_t>& row_indexes) const;

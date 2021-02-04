@@ -36,7 +36,7 @@ public:
 			{
 				swap_node(mutual_idxes[pos], remain_heap_num);
 			}
-
+			_nodes[remain_heap_num].value = value;
 			remain_heap_num++;
 			on_key_decrease(mutual_idxes[pos]);
 			return;
